@@ -4,8 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
-  server: {
-    host: true,
+  server: {    
     port: Number(process.env.PORT) ||3000,
     proxy: {
       '/api': { target: 'https://expense-manager-flax-phi.vercel.app', changeOrigin: true },
