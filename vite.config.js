@@ -4,11 +4,10 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [tailwindcss(), react()],
-  server: {    
-    port: Number(process.env.PORT) ||3000,
+  server: {
     proxy: {
-      '/api': { target: 'https://expense-manager-flax-phi.vercel.app', changeOrigin: true },
-      '/auth': { target: 'https://expense-manager-flax-phi.vercel.app', changeOrigin: true },
+      '/api': { target: 'http://localhost:5000', changeOrigin: true , rewrite: (path) => path.replace(/^\/api/, '')},
+      '/auth': { target: 'http://localhost:5000', changeOrigin: true,  rewrite: (path) => path.replace(/^\/auth/, '') },
     },
   },
 });
