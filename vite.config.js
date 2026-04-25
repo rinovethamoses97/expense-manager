@@ -6,10 +6,10 @@ export default defineConfig({
   plugins: [tailwindcss(), react()],
   server: {
     host: true,
-    port: 3000,
+    port: Number(process.env.PORT) ||3000,
     proxy: {
-      '/api': { target: 'https://expense-manager-flax-phi.vercel.app:5000', changeOrigin: true },
-      '/auth': { target: 'https://expense-manager-flax-phi.vercel.app:5000', changeOrigin: true },
+      '/api': { target: 'https://expense-manager-flax-phi.vercel.app', changeOrigin: true },
+      '/auth': { target: 'https://expense-manager-flax-phi.vercel.app', changeOrigin: true },
     },
   },
 });
