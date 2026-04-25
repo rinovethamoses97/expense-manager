@@ -1,15 +1,18 @@
-const dns = require('node:dns/promises');
-dns.setServers(['1.1.1.1', '1.0.0.1']);
-
 const mongoose = require('mongoose');
-const app = require('../server/app');
 
-let isConnected = false;
+let app = null;
 
 module.exports = async (req, res) => {
-  if (!isConnected) {
-    await mongoose.connect(process.env.MONGODB_URI);
-    isConnected = true;
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(process.env.MONGODB_URI);
+    }
+    if (!app) {
+      app = require('../server/app');
+    }
+    app(req, res);
+  } catch (err) {
+    console.error('[serverless] crash:', err.message, err.stack);
+    res.status(500).json({ error: 'Server error', message: err.message });
   }
-  return app(req, res);
 };
