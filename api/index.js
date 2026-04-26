@@ -1,9 +1,11 @@
+const dotenv = require('dotenv');
+dotenv.config();
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const MongoStore = require('connect-mongo').default;
-const dotenv = require('dotenv');
+
 const mongoose = require('mongoose');
 const expensesRouter = require('./routes/expenses');
 const summaryRouter = require('./routes/summary');
@@ -12,7 +14,8 @@ const authRouter = require('./routes/auth');
 const dns = require('node:dns/promises');
 dns.setServers(['1.1.1.1', '1.0.0.1',]);
 
-dotenv.config();
+
+console.log("Testing Vercel");
 require('./config/passport');
 
 const app = express();
