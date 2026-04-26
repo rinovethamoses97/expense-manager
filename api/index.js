@@ -1,12 +1,15 @@
-const dotenv = require('dotenv');
-dotenv.config();
-
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 const passport = require('passport');
 const MongoStore = require('connect-mongo').default;
 const mongoose = require('mongoose');
+
+const dotenv = require('dotenv');
+dotenv.config();
+
+import dns from 'node:dns';
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 require('./config/passport');
 
