@@ -15,7 +15,8 @@ const dns = require('node:dns/promises');
 dns.setServers(['1.1.1.1', '1.0.0.1',]);
 
 
-console.log("Testing Vercel");
+console.log("Testing Vercel1");
+console.log(process.env.GOOGLE_CLIENT_ID);
 require('./config/passport');
 
 const app = express();
