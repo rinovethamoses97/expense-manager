@@ -8,7 +8,7 @@ const passport = require('passport');
 const MongoStore = require('connect-mongo').default;
 const mongoose = require('mongoose');
 
-require('../server/config/passport');
+require('./config/passport');
 
 const app = express();
 
@@ -46,9 +46,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/auth', require('../server/routes/auth'));
-app.use('/api/expenses', require('../server/routes/expenses'));
-app.use('/api/summary', require('../server/routes/summary'));
+app.use('/auth', require('./routes/auth'));
+app.use('/api/expenses', require('./routes/expenses'));
+app.use('/api/summary', require('./routes/summary'));
 
 let isConnected = false;
 
