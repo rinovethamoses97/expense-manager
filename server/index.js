@@ -39,7 +39,7 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/auth', authRouter);
+app.use('/authe', authRouter);
 app.use('/api/expenses', expensesRouter);
 app.use('/api/summary', summaryRouter);
 

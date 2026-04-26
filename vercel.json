@@ -1,8 +1,4 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/auth/:path*", "destination": "/api/index" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "outputDirectory": "dist"
 }
