@@ -5,15 +5,15 @@ const passport = require('passport');
 const MongoStore = require('connect-mongo').default;
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const expensesRouter = require('../routes/expenses');
-const summaryRouter = require('../routes/summary');
-const authRouter = require('../routes/auth');
+const expensesRouter = require('../server/routes/expenses');
+const summaryRouter = require('../server/routes/summary');
+const authRouter = require('../server/routes/auth'); 
 // Fix Node.js DNS resolution for MongoDB Atlas SRV records
 const dns = require('node:dns/promises');
 dns.setServers(['1.1.1.1', '1.0.0.1',]);
 
 dotenv.config();
-require('../config/passport');
+require('../server/config/passport');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
