@@ -7,6 +7,8 @@ router.use(requireAuth);
 
 router.get('/', async (req, res) => {
   try {
+
+    console.log("Hurray!!");
     const { type, category, month, sort = '-date' } = req.query;
 
     const filter = { userId: req.user.id };
