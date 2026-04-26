@@ -16,7 +16,7 @@ dns.setServers(['1.1.1.1', '1.0.0.1',]);
 
 
 console.log("Testing Vercel1");
-console.log(process.env.GOOGLE_CLIENT_ID);
+console.log(process.env.GOOGLE_CLIENT_ID)
 require('./config/passport');
 
 const app = express();
@@ -47,15 +47,17 @@ app.use('/authe', authRouter);
 app.use('/api1/expenses', expensesRouter);
 app.use('/api1/summary', summaryRouter);
 
+console.log("Connecting with Mongo");
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
     // app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+    module.exports = app;
   })
   .catch((err) => {
     console.error('MongoDB connection failed:', err.message);
     process.exit(1);
   });
 
-module.exports = app;
+
