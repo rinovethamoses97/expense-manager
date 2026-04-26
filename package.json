@@ -2,6 +2,7 @@
   "name": "expense-manager",
   "version": "1.0.0",
   "private": true,
+  "type": "commonjs",
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "nodemon api/index.js",
