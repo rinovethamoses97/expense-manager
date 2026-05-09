@@ -5,7 +5,7 @@ const router = express.Router();
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 
 // Initiate Google OAuth
-router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' }));
 
 // Google OAuth callback
 router.get(
