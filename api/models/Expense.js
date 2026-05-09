@@ -9,6 +9,7 @@ const ExpenseSchema = new mongoose.Schema(
     date: { type: Date, required: true },
     description: { type: String, trim: true },
     userId: { type: String, required: true, index: true },
+    accountId: { type: String, required: true, index: true },
   },
   { timestamps: true }
 );

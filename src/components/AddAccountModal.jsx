@@ -2,53 +2,46 @@ import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { format } from 'date-fns';
 
-const EXPENSE_CATEGORIES = [
-  'Food & Dining', 'Transport','Fuel', 'Shopping', 'Entertainment', 'Health & Medical',
-  'Utilities', 'Rent', 'Education', 'Travel', 'Personal Care', 'Other',
-];
-const INCOME_CATEGORIES = ['Salary', 'Freelance', 'Business', 'Investment', 'Gift', 'Other'];
+
+const ACCOUNT_CATEGORIES = ['Savings', 'Current', 'Fixed Deposit'];
 
 const empty = {
-  title: '',
-  amount: 0,
-  type: 'expense',
-  category: '',
-  accountId: '',
-  date: format(new Date(), 'yyyy-MM-dd'),
+  accountName: '',
+  balance: 0,  
+  category: '',  
   description: '',
 };
 
-export default function ExpenseModal({ open, onClose, onSave, initial,accounts }) {
+export default function AddAccountModal({ open, onClose, onSave, initial  }) {
   const [form, setForm] = useState(empty);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    console.log("Testing Modal");
     if (open) {
-      setForm(initial ? { ...initial, date: format(new Date(initial.date), 'yyyy-MM-dd') } : empty);
+      setForm(initial ? { ...initial } : empty);
       setError('');
     }
   }, [open, initial]);
 
-  console.log("Accounts in Modal", accounts);
-
-  const categories = form.type === 'income' ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
     setError('');
+    // Setting initial balance as 0 for new accounts.
+    form.balance = 0;
     try {
-      const method = initial?._id ? 'PUT' : 'POST';
-      const url = initial?._id ? `/api/expenses/${initial._id}` : '/api/expenses';
-      console.log(form);
+      const method = 'POST';
+      const url = 'api/summary/addAccount';
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       const data = await res.json();
-      if (!data.success) throw new Error(data.error);
+      if (!data.success) throw new Error(data.error);      
       onSave();
       onClose();
     } catch (err) {
@@ -65,70 +58,43 @@ export default function ExpenseModal({ open, onClose, onSave, initial,accounts }
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-lg font-semibold text-gray-800">
-            {initial?._id ? 'Edit Transaction' : 'Add Transaction'}
+            {initial?._id ? 'Edit Account' : 'Add Account'}
           </h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="flex rounded-xl overflow-hidden border border-gray-200">
-            {['expense', 'income'].map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setForm({ ...form, type: t, category: '' })}
-                className={`flex-1 py-2 text-sm font-medium transition-colors capitalize ${
-                  form.type === t
-                    ? t === 'expense' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'
-                    : 'bg-white text-gray-500 hover:bg-gray-50'
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">          
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
             <input
               required
-              value={form.title}
-              onChange={(e) => setForm({ ...form, title: e.target.value })}
+              value={form.accountName}
+              onChange={(e) => setForm({ ...form, accountName: e.target.value })}
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              placeholder="e.g. Monthly rent"
+              placeholder="e.g. Personal Account"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          {/* <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Balance (₹)</label>
               <input
                 required
                 type="number"
                 min="0"
                 step="0.01"
-                value={form.amount || ''}
-                onChange={(e) => setForm({ ...form, amount: parseFloat(e.target.value) })}
+                value={form.balance || ''}
+                onChange={(e) => setForm({ ...form, balance: parseFloat(e.target.value) })}
                 className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 placeholder="0"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-              <input
-                required
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              />
-            </div>
-          </div>
+            </div>           
+          </div> */}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Account Category</label>
             <select
               required
               value={form.category}
@@ -136,23 +102,8 @@ export default function ExpenseModal({ open, onClose, onSave, initial,accounts }
               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
             >
               <option value="">Select category</option>
-              {categories.map((c) => (
+              {ACCOUNT_CATEGORIES.map((c) => (
                 <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Account</label>
-            <select
-              required
-              value={form.accountId}
-              onChange={(e) => setForm({ ...form, accountId: e.target.value })}
-              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
-            >
-              <option value="">Select Account</option>
-              {accounts.map((c) => (
-                <option key={c._id} value={c._id}>{c.accountName}</option>
               ))}
             </select>
           </div>

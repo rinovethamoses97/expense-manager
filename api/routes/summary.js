@@ -1,9 +1,29 @@
 const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
+const Account = require('../models/Account');
 const requireAuth = require('../middleware/requireAuth');
 
 router.use(requireAuth);
+
+router.post('/addAccount', async (req, res) => {
+  try {
+    const account = await Account.create({ ...req.body, userId: req.user.id });
+    res.status(201).json({ success: true, data: account });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message || 'Failed to create account' });
+  }
+});
+
+router.get('/getAccounts', async (req, res) => {
+  try {
+    const filter = { userId: req.user.id };
+    const accounts = await Account.find(filter);
+    res.status(201).json({ success: true, data: accounts });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message || 'Failed to Fetch accounts' });
+  }
+});
 
 router.get('/', async (req, res) => {
   try {

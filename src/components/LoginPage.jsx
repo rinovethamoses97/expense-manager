@@ -13,7 +13,7 @@ export default function LoginPage() {
         </div>
 
         <div className="text-center">
-          <h1 className="text-lg font-semibold text-gray-800">Hello Ranju!!</h1>
+          <h1 className="text-lg font-semibold text-gray-800">Hello!!</h1>
           <p className="text-sm text-gray-500 mt-1">Sign in to manage your finances</p>
         </div>
 

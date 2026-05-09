@@ -2,13 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../../api/models/Expense');
 const requireAuth = require('../../api/middleware/requireAuth');
-
+const Account = require('../../api/models/Account');
 router.use(requireAuth);
 
 router.get('/', async (req, res) => {
   try {
 
-    console.log("Hurray!!");
     const { type, category, month, sort = '-date' } = req.query;
 
     const filter = { userId: req.user.id };
@@ -32,6 +31,11 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const expense = await Expense.create({ ...req.body, userId: req.user.id });
+    const account = await Account.findOne({ _id: expense.accountId, userId: req.user.id });
+    if (account) {
+      account.balance += expense.type === 'income' ? expense.amount : -expense.amount;
+      await account.save();
+    }
     res.status(201).json({ success: true, data: expense });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message || 'Failed to create expense' });

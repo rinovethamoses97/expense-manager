@@ -6,6 +6,8 @@ import SummaryCards from './components/SummaryCards';
 import Charts from './components/Charts';
 import ExpenseList from './components/ExpenseList';
 import ExpenseModal from './components/ExpenseModal';
+import AddAccountModal from './components/AddAccountModal';
+import AccountsCard from './components/AccountsCard';
 import Filters from './components/Filters';
 import LoginPage from './components/LoginPage';
 import { useAuth } from './context/AuthContext';
@@ -13,29 +15,36 @@ import { useAuth } from './context/AuthContext';
 export default function App() {
   const { user } = useAuth();
   const [expenses, setExpenses] = useState([]);
+  const [accounts, setAccounts] = useState([]);
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0, byCategory: [], byMonth: [] });
   const [month, setMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [type, setType] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
+  const [accountModalOpen, setAccountModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async () => {    
     setLoading(true);
     setFetchError('');
     try {
+      console.log("Fetching Data");
       const params = new URLSearchParams({ month, sort: '-date' });
       if (type !== 'all') params.set('type', type);
 
-      const [expRes, sumRes] = await Promise.all([
+      const [expRes, sumRes,acctsRes] = await Promise.all([
         fetch(`/api/expenses?${params}`, { credentials: 'include' }),
         fetch(`/api/summary?month=${month}`, { credentials: 'include' }),
+        fetch(`/api/summary/getAccounts`, { credentials: 'include' }),
       ]);
-      const [expData, sumData] = await Promise.all([expRes.json(), sumRes.json()]);
+      
+      const [expData, sumData,acctsData] = await Promise.all([expRes.json(), sumRes.json(),acctsRes.json()]);
 
       if (expData.success) setExpenses(expData.data);
       if (sumData.success) setSummary(sumData.data);
+      if (acctsData.success) setAccounts(acctsData.data);
+      
     } catch {
       setFetchError('Unable to reach the server. Please check your connection.');
     } finally {
@@ -47,7 +56,7 @@ export default function App() {
     if (user) fetchData();
   }, [fetchData, user]);
 
-  function openAdd() {
+  function openAdd() {    
     setEditTarget(null);
     setModalOpen(true);
   }
@@ -55,6 +64,11 @@ export default function App() {
   function openEdit(e) {
     setEditTarget(e);
     setModalOpen(true);
+  }
+
+  function openAccountAdd(){
+    console.log("Modal Opening");
+    setAccountModalOpen(true)
   }
 
   async function handleDelete(id) {
@@ -82,13 +96,24 @@ export default function App() {
             <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
             <p className="text-sm text-gray-500 mt-0.5">Track your income and expenses</p>
           </div>
-          <button
+          <div>
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <button
             onClick={openAdd}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
-          >
+            >
             <Plus size={17} />
             Add Transaction
-          </button>
+            </button>
+            <button
+              onClick={openAccountAdd}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm"
+            >
+              <Plus size={17} />
+              Add Account
+            </button>
+            </div>            
+          </div>
         </div>
 
         {fetchError && (
@@ -98,11 +123,12 @@ export default function App() {
         )}
 
         <SummaryCards income={summary.income} expense={summary.expense} balance={summary.balance} />
+        <AccountsCard accounts={accounts}/>
         <Charts byCategory={summary.byCategory} byMonth={summary.byMonth} />
 
         <div className="space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
-            <h2 className="text-lg font-semibold text-gray-700">Transactions Test</h2>
+            <h2 className="text-lg font-semibold text-gray-700">Transactions</h2>
             <Filters month={month} type={type} onMonthChange={setMonth} onTypeChange={setType} />
           </div>
 
@@ -111,7 +137,7 @@ export default function App() {
               Loading...
             </div>
           ) : (
-            <ExpenseList expenses={expenses} onEdit={openEdit} onDelete={handleDelete} />
+            <ExpenseList expenses={expenses} accounts={accounts} onEdit={openEdit} onDelete={handleDelete} />
           )}
         </div>
 
@@ -120,6 +146,13 @@ export default function App() {
           onClose={() => setModalOpen(false)}
           onSave={fetchData}
           initial={editTarget}
+          accounts={accounts}
+        />
+        <AddAccountModal
+          open={accountModalOpen}            
+          onClose={() => setAccountModalOpen(false)}  
+          onSave={fetchData}
+          initial={editTarget}      
         />
       </main>
     </div>

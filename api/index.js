@@ -21,7 +21,6 @@ const allowedOrigins = [
   'https://expense-manager-flax-phi.vercel.app',
 ];
 
-console.log("Test1");
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -55,7 +54,6 @@ app.use('/api/summary', require('./routes/summary'));
 
 let isConnected = false;
 
-console.log("Test2");
 // Export synchronously so Vercel detects the handler at build time
 module.exports = async (req, res) => {
   try {
@@ -70,3 +68,10 @@ module.exports = async (req, res) => {
     res.status(500).json({ error: 'Server error', message: err.message });
   }
 };
+
+// mongoose.connect(process.env.MONGODB_URI).then(function(){
+//   console.log("Mongo DB Connected");
+//   app.listen(process.env.PORT||5000,function(){
+//     console.log('Server Running');
+//   })
+// })

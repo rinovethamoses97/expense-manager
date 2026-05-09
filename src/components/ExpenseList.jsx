@@ -25,7 +25,7 @@ function categoryColor(cat) {
   return CATEGORY_COLORS[cat] ?? 'bg-slate-100 text-slate-700';
 }
 
-export default function ExpenseList({ expenses, onEdit, onDelete }) {
+export default function ExpenseList({ expenses, onEdit, onDelete,accounts }) {
   const [deleting, setDeleting] = useState(null);
 
   async function handleDelete(id) {
@@ -59,6 +59,9 @@ export default function ExpenseList({ expenses, onEdit, onDelete }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-medium text-gray-800 text-sm truncate">{exp.title}</span>
+                
+                <span className="font-medium text-gray-800 text-sm truncate">{accounts.find((a) => a._id === exp.accountId)?.accountName || 'Unknown Account'}</span>
+
                 <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${categoryColor(exp.category)}`}>
                   {exp.category}
                 </span>
