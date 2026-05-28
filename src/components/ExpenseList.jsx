@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Pencil, Trash2, TrendingUp, TrendingDown } from 'lucide-react';
+import { Pencil, Trash2, TrendingUp, TrendingDown, Paperclip } from 'lucide-react';
 
 const CATEGORY_COLORS = {
   'Food & Dining': 'bg-orange-100 text-orange-700',
@@ -27,6 +27,7 @@ function categoryColor(cat) {
 
 export default function ExpenseList({ expenses, onEdit, onDelete,accounts }) {
   const [deleting, setDeleting] = useState(null);
+  const [lightboxUrl, setLightboxUrl] = useState(null);
 
   async function handleDelete(id) {
     if (!confirm('Delete this transaction?')) return;
@@ -77,6 +78,16 @@ export default function ExpenseList({ expenses, onEdit, onDelete,accounts }) {
             </span>
 
             <div className="flex gap-1 shrink-0">
+              {exp.attachmentUrl && (
+                <button
+                  type="button"
+                  onClick={() => setLightboxUrl(exp.attachmentUrl)}
+                  title="View receipt"
+                  className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                >
+                  <Paperclip size={15} />
+                </button>
+              )}
               <button
                 onClick={() => onEdit(exp)}
                 className="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
@@ -94,6 +105,20 @@ export default function ExpenseList({ expenses, onEdit, onDelete,accounts }) {
           </div>
         ))}
       </div>
+
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <img
+            src={lightboxUrl}
+            alt="Receipt"
+            className="max-w-full max-h-full rounded-xl shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -10,6 +10,7 @@ const ExpenseSchema = new mongoose.Schema(
     description: { type: String, trim: true },
     userId: { type: String, required: true, index: true },
     accountId: { type: String, required: true, index: true },
+    attachmentUrl: { type: String, trim: true },
   },
   { timestamps: true }
 );

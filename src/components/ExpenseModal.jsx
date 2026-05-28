@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Camera, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 const EXPENSE_CATEGORIES = [
@@ -16,19 +16,71 @@ const empty = {
   accountId: '',
   date: format(new Date(), 'yyyy-MM-dd'),
   description: '',
+  attachmentUrl: '',
 };
 
 export default function ExpenseModal({ open, onClose, onSave, initial,accounts }) {
   const [form, setForm] = useState(empty);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [scanning, setScanning] = useState(false);
+  const [scanNotice, setScanNotice] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (open) {
       setForm(initial ? { ...initial, date: format(new Date(initial.date), 'yyyy-MM-dd') } : empty);
       setError('');
+      setScanNotice('');
     }
   }, [open, initial]);
+
+  async function handleReceiptUpload(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setScanning(true);
+    setError('');
+    setScanNotice('');
+    try {
+      const body = new FormData();
+      body.append('receipt', file);
+      const res = await fetch('/api/expenses/scan-receipt', {
+        method: 'POST',
+        credentials: 'include',
+        body,
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Scan failed');
+
+      const { attachmentUrl, parsed } = data.data;
+      const allCategories = [...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES];
+      const matchedCategory = parsed.category && allCategories.includes(parsed.category)
+        ? parsed.category
+        : '';
+
+      setForm((prev) => ({
+        ...prev,
+        attachmentUrl,
+        title: parsed.merchant || prev.title,
+        amount: parsed.amount ?? prev.amount,
+        date: parsed.date || prev.date,
+        category: matchedCategory || prev.category,
+      }));
+
+      const filled = [parsed.merchant && 'merchant', parsed.amount != null && 'amount', parsed.date && 'date']
+        .filter(Boolean).length;
+      setScanNotice(
+        filled === 0
+          ? "Receipt uploaded, but we couldn't read any fields — please fill them in."
+          : 'Receipt scanned — please confirm the fields below.'
+      );
+    } catch (err) {
+      setError(err.message || 'Failed to scan receipt');
+    } finally {
+      setScanning(false);
+    }
+  }
 
   console.log("Accounts in Modal", accounts);
 
@@ -73,6 +125,52 @@ export default function ExpenseModal({ open, onClose, onSave, initial,accounts }
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="flex items-center gap-3 bg-indigo-50 border border-indigo-100 rounded-xl p-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={handleReceiptUpload}
+            />
+            {form.attachmentUrl ? (
+              <a href={form.attachmentUrl} target="_blank" rel="noreferrer" className="shrink-0">
+                <img
+                  src={form.attachmentUrl}
+                  alt="Receipt"
+                  className="w-12 h-12 rounded-lg object-cover border border-indigo-200"
+                />
+              </a>
+            ) : (
+              <div className="w-12 h-12 rounded-lg bg-white border border-indigo-200 flex items-center justify-center text-indigo-400">
+                <Camera size={20} />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-medium text-indigo-700">Scan a receipt</p>
+              <p className="text-xs text-indigo-500/80 truncate">
+                {scanning
+                  ? 'Reading receipt…'
+                  : form.attachmentUrl
+                    ? 'Attached — tap to replace'
+                    : 'Auto-fill fields from a photo'}
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={scanning}
+              onClick={() => fileInputRef.current?.click()}
+              className="shrink-0 inline-flex items-center gap-1.5 bg-indigo-600 text-white text-xs font-medium rounded-lg px-3 py-1.5 hover:bg-indigo-700 transition-colors disabled:opacity-60"
+            >
+              {scanning ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+              {form.attachmentUrl ? 'Replace' : 'Upload'}
+            </button>
+          </div>
+          {scanNotice && (
+            <p className="text-xs text-indigo-600 -mt-2">{scanNotice}</p>
+          )}
+
           <div className="flex rounded-xl overflow-hidden border border-gray-200">
             {['expense', 'income'].map((t) => (
               <button
