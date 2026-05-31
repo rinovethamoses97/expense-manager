@@ -84,17 +84,14 @@ export default function App() {
     setAccountModalOpen(true)
   }
 
-  async function openProfile(){
-    const profile = await getProfile();
-    console.log("Fetched Profile:", profile);
-    if(profile){
-      setEditTarget(profile);
-    }
-    else{
-      setEditTarget(user);
-    }
-    setProfileModalOpen(true);
+  function openProfile() {
+    setEditTarget(user);          
+    setProfileModalOpen(true);    
+    getProfile().then((profile) => {
+      if (profile) setEditTarget(profile);
+    });
   }
+
 
   async function handleDelete(id) {
     await fetch(`/api/expenses/${id}`, { method: 'DELETE', credentials: 'include' });
