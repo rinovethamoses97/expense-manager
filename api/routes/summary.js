@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
 const Account = require('../models/Account');
+const Profile = require('../models/Profile');
 const requireAuth = require('../middleware/requireAuth');
 
 router.use(requireAuth);
@@ -12,6 +13,38 @@ router.post('/addAccount', async (req, res) => {
     res.status(201).json({ success: true, data: account });
   } catch (err) {
     res.status(400).json({ success: false, error: err.message || 'Failed to create account' });
+  }
+});
+
+
+router.post('/updateProfile', async (req, res) => {
+  try {
+
+    let profile = await Profile.findOne({userId: req.user.id });
+    if(profile){
+      profile.name = req.body.name;
+      profile.email = req.body.email;
+      profile.monthlyIncome = req.body.monthlyIncome;
+      await profile.save();
+    }
+    else{
+      await Profile.create({ ...req.body, userId: req.user.id });
+    }   
+    res.status(201).json({ success: true, data: profile });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message || 'Failed to Update Profile' });
+  }
+});
+
+
+
+router.get('/getProfile', async (req, res) => {
+  try {    
+    const filter = { userId: req.user.id };
+    const profile = await Profile.findOne(filter);
+    res.status(201).json({ success: true, data: profile });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message || 'Failed to Fetch profile' });
   }
 });
 

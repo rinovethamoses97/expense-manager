@@ -7,6 +7,7 @@ import Charts from './components/Charts';
 import ExpenseList from './components/ExpenseList';
 import ExpenseModal from './components/ExpenseModal';
 import AddAccountModal from './components/AddAccountModal';
+import ProfileModal from './components/ProfileModal';
 import AccountsCard from './components/AccountsCard';
 import Filters from './components/Filters';
 import LoginPage from './components/LoginPage';
@@ -21,6 +22,7 @@ export default function App() {
   const [type, setType] = useState('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [accountModalOpen, setAccountModalOpen] = useState(false);
+  const [profileModalOpen, setProfileModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
@@ -29,7 +31,7 @@ export default function App() {
     setLoading(true);
     setFetchError('');
     try {
-      console.log("Fetching Data");
+
       const params = new URLSearchParams({ month, sort: '-date' });
       if (type !== 'all') params.set('type', type);
 
@@ -56,6 +58,18 @@ export default function App() {
     if (user) fetchData();
   }, [fetchData, user]);
 
+  async function getProfile(){
+    try{
+      const res = await fetch(`api/summary/getProfile`, { credentials: 'include' });
+      const data = await res.json();
+      if (data.success) return data.data;
+    }
+    catch(err){
+      console.error("Failed to fetch profile:", err);
+      return null;
+    } 
+  }
+
   function openAdd() {    
     setEditTarget(null);
     setModalOpen(true);
@@ -67,8 +81,19 @@ export default function App() {
   }
 
   function openAccountAdd(){
-    console.log("Modal Opening");
     setAccountModalOpen(true)
+  }
+
+  async function openProfile(){
+    const profile = await getProfile();
+    console.log("Fetched Profile:", profile);
+    if(profile){
+      setEditTarget(profile);
+    }
+    else{
+      setEditTarget(user);
+    }
+    setProfileModalOpen(true);
   }
 
   async function handleDelete(id) {
@@ -89,7 +114,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
+      <Navbar onProfileClick={openProfile} />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
@@ -112,7 +137,7 @@ export default function App() {
               <Plus size={17} />
               Add Account
             </button>
-            </div>            
+            </div>
           </div>
         </div>
 
@@ -153,6 +178,13 @@ export default function App() {
           onClose={() => setAccountModalOpen(false)}  
           onSave={fetchData}
           initial={editTarget}      
+        />
+
+        <ProfileModal
+          open={profileModalOpen}            
+          onClose={() => setProfileModalOpen(false)}  
+          onSave={fetchData}
+          initial={editTarget}                
         />
       </main>
     </div>
